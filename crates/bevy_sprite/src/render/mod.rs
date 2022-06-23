@@ -465,12 +465,6 @@ pub fn queue_sprites(
                 // Calculate vertex data for this item
 
                 let mut uvs = QUAD_UVS;
-                if extracted_sprite.flip_x {
-                    uvs = [uvs[1], uvs[0], uvs[3], uvs[2]];
-                }
-                if extracted_sprite.flip_y {
-                    uvs = [uvs[3], uvs[2], uvs[1], uvs[0]];
-                }
 
                 // By default, the size of the quad is the size of the texture
                 let mut quad_size = current_image_size;
@@ -489,10 +483,17 @@ pub fn queue_sprites(
                     quad_size = custom_size;
                 }
 
-                // Apply size and global transform
+                // Apply size and global transform, taking into account flipping
+                let mut transform = extracted_sprite.transform;
+                if extracted_sprite.flip_x {
+                    transform.scale.x *= -1.0;
+                }
+                if extracted_sprite.flip_y {
+                    transform.scale.y *= -1.0;
+                }
+
                 let positions = QUAD_VERTEX_POSITIONS.map(|quad_pos| {
-                    extracted_sprite
-                        .transform
+                    transform
                         .mul_vec3(((quad_pos - extracted_sprite.anchor) * quad_size).extend(0.))
                         .into()
                 });
